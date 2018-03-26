@@ -11,9 +11,9 @@ if(!verifyToken($token, $gameId, $playerId)) {
 include "makeConnection.php";
 
 $currentPlayer = getCurrentPlayer($gameId, $mysqli);
-$gameData = mysqli_fetch_all(mysqli_query($mysqli, "SELECT turn_number,roll FROM games WHERE id=$gameId;"), MYSQLI_ASSOC)[0];
+$gameData = mysqli_fetch_all(mysqli_query($mysqli, "SELECT turn_number,roll,winner FROM games WHERE id=$gameId;"), MYSQLI_ASSOC)[0];
 $canSuggest = mysqli_fetch_array(mysqli_query($mysqli, "SELECT can_suggest FROM players WHERE id=$currentPlayer;"))[0];
-echo '{"success":true, "error":0, "message":"success", "currentTurn":'.
+echo '{"success":true, "error":0, "message":"success", "winner":'.($gameData["winner"]!=NULL?$gameData["winner"]:"null").', "currentTurn":'.
   ($gameData["turn_number"]!=NULL?$gameData["turn_number"]:"null").', "currentPlayer":'.$currentPlayer.
   ', "currentPlayerCanSuggest":'.($canSuggest?$canSuggest:"null").', "latestRoll":'.($gameData["roll"]!=NULL?$gameData["roll"]:"null").', "pieces": [';
 

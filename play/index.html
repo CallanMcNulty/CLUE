@@ -67,6 +67,9 @@
           tabbedContentComponent.update();
           oldTurn = g.turn;
         }
+        if(g.winner!==null) {
+          window.location.href = window.location.origin+"/victory.php?gameId="+g.id;
+        }
         if(tabbedContentComponent.activeTab===0) {
           boardComponent.update();
         }

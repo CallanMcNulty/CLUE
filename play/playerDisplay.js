@@ -48,8 +48,8 @@ class PlayerDisplay extends Component {
         $(icon.element).css("box-shadow", "0 0 36px orange");
       if(this.g.currentPlayer===p.id) $(icon.element).css("top", "2em");
 
-      $(icon.element).click(() => window.location.href =
-        `${window.location.origin}${window.location.pathname}?gameId=${this.g.id}&playerId=${p.id}`);
+      // $(icon.element).click(() => window.location.href =
+      //   `${window.location.origin}${window.location.pathname}?gameId=${this.g.id}&playerId=${p.id}`);
     });
 
     let suggestion = el.find("#suggestion")[0];

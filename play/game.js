@@ -10,6 +10,7 @@ class Game {
     this.players = [];
     this.board = [];
     this.history = [];
+    this.winner = null;
   }
   init(callback) {
     $.when(
@@ -36,12 +37,12 @@ class Game {
           console.log(data);
           this.turn = data.currentTurn;
           this.currentPlayer = data.currentPlayer;
-          this.players.find(p => p.id===data.currentPlayer).canSuggest = data.currentPlayerCanSuggest;
-          data.pieces.forEach(piece => this.players.find(p => p.id===piece.player).pieceSpace = piece.space);
-          // data.latestSuggestion.suggestingPlayer = this.currentPlayer;
-          // data.latestSuggestion.turnNumber = this.turn;
-          // this.history.append(data.latestSuggestion);
-          this.roll = data.latestRoll;
+          this.winner = data.winner;
+          if(this.winner===null) {
+            this.players.find(p => p.id===data.currentPlayer).canSuggest = data.currentPlayerCanSuggest;
+            data.pieces.forEach(piece => this.players.find(p => p.id===piece.player).pieceSpace = piece.space);
+            this.roll = data.latestRoll;
+          }
         }
       }),
       $.ajax({
