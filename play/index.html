@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+    <script src="/play/cardInfo.js"></script>
+    <script src="/play/game.js"></script>
+    <script src="/play/notes.js"></script>
+    <script src="/play/framework-core.js"></script>
+    <script src="/play/board.js"></script>
+    <script src="/play/card.js"></script>
+    <script src="/play/playerIcon.js"></script>
+    <script src="/play/cardSelector.js"></script>
+    <script src="/play/playerDisplay.js"></script>
+    <script src="/play/suggestionHistory.js"></script>
+    <script src="/play/tabbedContent.js"></script>
+    <script src="/play/notebook.js"></script>
+    <title>CLUE</title>
+  </head>
+  <style media="screen">
+    button {
+      background-color: beige;
+      border: none;
+      min-width: 5em;
+      padding: .5em;
+      box-shadow: 0 0 6px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #d0d0b0;
+    }
+    #controls button {
+      margin: 0 .25em 0 .25em;
+    }
+  </style>
+  <body style="display:flex;justify-content:space-around;margin:0;padding:1em;background-color:beige;">
+    <div id="col1" style="width:50%;display:flex;flex-direction:column;align-items:center;"></div>
+    <div id="col2" style="width:50%;display:flex;flex-direction:column;align-items:center;"></div>
+  </body>
+  <script type="text/javascript">
+    let query = {};
+    window.location.search.substr(1).split("&").forEach(item => {
+      let d = item.split("=");
+      query[d[0]]=d[1];
+    });
+    var gameId = parseInt(query["gameId"]);
+    var gameInfo = JSON.parse(localStorage.getItem("current-games")).find(g => g.id===gameId);
+    var g = new Game(gameId, parseInt(query["playerId"]), gameInfo.token);
+    var boardComponent;
+    var playerDisplayComponent;
+    var notebookComponent;
+    var tabbedContentComponent;
+    var suggestionHistoryComponent;
+    var handComponent;
+    var intervalId;
+    function stopAutoUpdate() {
+      if(intervalId)
+      window.clearInterval(intervalId);
+    }
+    var oldTurn = 0;
+    function startAutoUpdate() {
+      intervalId = window.setInterval(() => g.update(() => {
+        playerDisplayComponent.update();
+        if(g.turn!==oldTurn) {
+          tabbedContentComponent.update();
+          oldTurn = g.turn;
+        }
+        if(tabbedContentComponent.activeTab===0) {
+          boardComponent.update();
+        }
+        let currentSuggestion = g.history.find(h => h.turnNumber===g.turn);
+        let myTurnAndNoUnresolvedSuggestion = g.currentPlayer===g.myPlayer &&
+          !(currentSuggestion && currentSuggestion.suggestingPlayer===g.myPlayer &&
+          currentSuggestion.shownCard===null && currentSuggestion.resolvingPlayer!==null);
+        let needToResolveSuggestion = currentSuggestion &&
+          currentSuggestion.resolvingPlayer===g.myPlayer && currentSuggestion.shownCard===null;
+        if(myTurnAndNoUnresolvedSuggestion || needToResolveSuggestion) {
+          stopAutoUpdate();
+        }
+      }), 1000);
+    }
+    g.init(() => {
+      playerDisplayComponent = new PlayerDisplay(g, Math.min(80, window.innerWidth/15));
+      playerDisplayComponent.insert($("#col1")[0]);
+
+      boardComponent = new Board(g, Math.min(21, window.innerWidth*.018));
+      window.addEventListener("keydown", () => {
+        switch(event.keyCode) {
+          case 39:
+          boardComponent.move("right");
+          break;
+          case 37:
+          boardComponent.move("left");
+          break;
+          case 40:
+          boardComponent.move("down");
+          break;
+          case 38:
+          boardComponent.move("up");
+          break;
+        }
+      });
+      notebookComponent = new Notebook(g);
+      suggestionHistoryComponent = new SuggestionHistory(g);
+      handComponent = new Hand(g.myCards);
+
+      tabbedContentComponent = new TabbedContent(
+        [boardComponent,notebookComponent,suggestionHistoryComponent,handComponent],
+        ["Board","Notebook","Suggestion Log","Your Cards"]
+      );
+      tabbedContentComponent.insert($("#col2")[0]);
+      if(g.myPlayer===g.currentPlayer && g.roll && !g.players.find(p => p.id===g.currentPlayer).canSuggest) {
+        boardComponent.changeMovingPlayer(g.myPlayer);
+      }
+
+      startAutoUpdate();
+    });
+  </script>
+<html>

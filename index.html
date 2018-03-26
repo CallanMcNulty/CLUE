@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+    <script src="/play/cardInfo.js"></script>
+    <script src="/play/framework-core.js"></script>
+    <script src="/play/playerIcon.js"></script>
+    <title>CLUE</title>
+  </head>
+  <style media="screen">
+    button,select {
+      background-color: beige;
+      border: none;
+      min-width: 5em;
+      padding: .5em;
+      box-shadow: 0 0 6px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #d0d0b0;
+    }
+    #create {
+      background-color: #ffca69;
+      font-weight: bold;
+      font-size: 1em;
+    }
+    #create:hover {
+      background-color: orange;
+    }
+    .window {
+      background-color: white;
+      border-radius: 6px;
+      box-shadow: 0 0 6px black;
+      padding: 1em;
+    }
+  </style>
+  <body style="margin:0;background-color:beige;position:relative;">
+    <div class="window" style="text-align:center;margin:auto;margin-bottom:1em;width:20em;border-radius:0 0 6px 6px;">
+      <h1 style="text-align:center;">Play CLUE</h1>
+      <button id="create">Create Game</button>
+    </div>
+    <div id="main-content" style="display:flex;justify-content:center;"></div>
+    <div id="overlay" style="position:fixed;width:100%;height:100%;top:0;left:0;
+      display:none;justify-content:center;align-items:center;background-color:rgba(50,50,50,0.5);
+    ">
+      <div class="window"></div>
+    </div>
+  </body>
+  <script type="text/javascript">
+    class GamesList extends Component {
+      constructor(games, open) {
+        super();
+        this.games = games;
+        this.open = open;
+      }
+      template() {
+        let el = $(`<div class="window" style="width:20em;margin:1em;"><h2>${this.open?"Open":"My"} Games</h2></div>`);
+        let noItems = true;
+        this.games.forEach(g => {
+          if(g.joinable || !this.open) {
+            noItems = false;
+            let listing = $(`<div>${g.name}: </div>`);
+            el.append(listing);
+            let joinButton = $(`<button style="margin:.5em;">${this.open?"Join":"Resume"}</button>`);
+            listing.append(joinButton);
+            joinButton.click(() => {
+              if(this.open) {
+                $("#overlay").css("display", "flex");
+                var joinComponent = new JoinInterface(g.id, g.name);
+                joinComponent.insert($("#overlay div")[0]);
+              } else {
+                window.location.href = window.location.origin+`/play?gameId=${g.id}&playerId=${g.player}`;
+              }
+            });
+          }
+        });
+        if(noItems) {
+          el.append(`<div>No games at this time</div>`);
+        }
+        return el[0];
+      }
+    }
+    class CreateGameForm extends Component {
+      constructor() {
+        super();
+      }
+      template() {
+        let el = $(`
+          <div>
+            <h3 style="text-align:center;">Create Game</h3>
+            <span>Game Name: </span>
+          </div>
+        `);
+        let nameField = $(`<input type="text" required />`);
+        el.append(nameField);
+        let submit = $(`<div style="text-align:center;margin:1em;"></div>`);
+        el.append(submit);
+        let submitButton = $(`<button>Create</button>`);
+        submit.append(submitButton);
+        submitButton.click(() => {
+          let name = nameField.val();
+          if(name.length<3) return;
+          submitButton.hide();
+          $.ajax({
+            url: `createGame.php?password=${name}`,
+            success: (result) => {
+              let data = JSON.parse(result);
+              console.log(data);
+              if(data.success) {
+                let join = new JoinInterface(data.gameId, name);
+                join.parent = this.element.parentNode;
+                this.element.remove();
+                join.insert();
+              } else {
+                submitButton.show();
+              }
+            }
+          });
+        });
+        return el[0];
+      }
+    }
+    class JoinInterface extends Component {
+      constructor(gameId, gameName) {
+        super();
+        this.characterOptions = [0,1,2,3,4,5];
+        this.chosenCharacterIndex = 0;
+        this.gameId = gameId;
+        this.gameName = gameName;
+      }
+      template() {
+        let el = $(`<div><h3 style="text-align:center;">Choose Your Character</h3></div>`);
+        let charRow = $(`
+          <div style="
+            display:flex;align-items:center;justify-content:center;
+            background-color:darkslategrey;padding:1em;max-width:600px;
+          "></div>
+        `);
+        el.append(charRow);
+        this.characterOptions.forEach((id,i) => {
+          let characterPortrait = $(`
+            <img src="${cardInfo[id].img}"
+              style="width:15%;border:4px solid;border-radius:10%;
+              border-color:${i===this.chosenCharacterIndex?"orange":"transparent"};
+            " />
+          `);
+          characterPortrait.click(() => {
+            this.chosenCharacterIndex = i;
+            this.update();
+          });
+          charRow.append(characterPortrait);
+        });
+        el.append(`
+          <h4 style="text-align:center;">
+            ${cardInfo[this.characterOptions[this.chosenCharacterIndex]].name}
+          </h4>
+        `);
+        let buttonHolder = $(`<div style="text-align:center;"></div>`);
+        el.append(buttonHolder);
+        let joinButton = $(`<button>Join</button>`);
+        buttonHolder.append(joinButton);
+        let messageHolder = $(`<div style="text-align:center;margin-top:1em;"></div>`);
+        el.append(messageHolder);
+        joinButton.click(() => {
+          joinButton.hide();
+          $.ajax({
+            url: `join.php?gameId=${this.gameId}&characterId=${this.characterOptions[this.chosenCharacterIndex]}&isAI=false`,
+            success: (result) => {
+              let r = JSON.parse(result);
+              console.log(r);
+              if(r.success) {
+                let info = {"id":this.gameId, "name":this.gameName, "player":r.id, "token":r.token};
+                currentGames.push(info);
+                localStorage.setItem("current-games", JSON.stringify(currentGames));
+                this.element.remove();
+                let lobby = new GameLobby(info);
+                lobby.previousSibling = this.previousSibling;
+                lobby.parent = this.parent;
+                lobby.insert();
+              } else {
+                joinButton.show();
+                if(r.error===2) {
+                  this.characterOptions.splice(this.chosenCharacterIndex,1);
+                  this.chosenCharacterIndex = 0;
+                  this.update();
+                }
+                messageHolder.text(r.message);
+              }
+            }
+          });
+        });
+        return el[0];
+      }
+    }
+    class GameLobby extends Component {
+      constructor(gameInfo) {
+        super();
+        this.gameInfo = gameInfo;
+        this.g = null;
+        this.aiPlayerFormShowing = false;
+        this.updateId = this.startAutoUpdate();
+      }
+      template() {
+        let el = $(`<div><h3 style="text-align:center;">${this.gameInfo.name}</h3></div>`);
+        let currentPlayersRow = $(`
+          <div style="display:flex;align-items:center;justify-content:center;">
+            <div>Players: </div>
+          </div>
+        `);
+        el.append(currentPlayersRow);
+        if(this.g) {
+          this.g.players.forEach(p => {
+            let icon = new PlayerIcon(this.g, p.id, 45);
+            icon.insert(currentPlayersRow[0]);
+            $(icon.element).css("margin-left","1em");
+          });
+        }
+        if(this.aiPlayerFormShowing) {
+          let aiPlayerForm = $(`<div style="text-align:center;margin:1em;">Character: </div>`);
+          el.append(aiPlayerForm);
+          let characterSelect = $(`<select></select>`);
+          aiPlayerForm.append(characterSelect);
+          for(let i=0; i<6; i++) {
+            if(this.g && this.g.players.findIndex(p => p.character===i)===-1) {
+              let o = $(`<option value="${i}">${cardInfo[i].name}</option>`);
+              characterSelect.append(o);
+            }
+          }
+          let createAi = $(`<button style="margin-left:1em;">Create AI Player</button>`);
+          aiPlayerForm.append(createAi);
+          createAi.click(() => {
+            $.ajax({
+              url: `join.php?gameId=${this.gameInfo.id}&characterId=${characterSelect.val()}&isAI=true`,
+              success: (result) => {
+                let r = JSON.parse(result);
+                console.log(r);
+                if(r.success) {
+                  this.aiPlayerFormShowing = false;
+                }
+                this.update()
+              }
+            });
+          });
+          let cancelButton = $(`<button style="margin-left:1em;">Cancel</button>`);
+          aiPlayerForm.append(cancelButton);
+          cancelButton.click(() => {this.aiPlayerFormShowing = false;this.update();})
+        } else {
+          let addAi = $(`<button style="margin-left:1em;">Add AI</button>`);
+          currentPlayersRow.append(addAi);
+          addAi.click(() => {this.aiPlayerFormShowing = true;this.update();})
+        }
+        let label = $(`<div style="text-align:center;margin:1em;">waiting for players to join...</div>`);
+        el.append(label);
+        let begin = $(`<div style="text-align:center;margin:1em;"></div>`);
+        el.append(begin);
+        let beginButton = $(`<button>Start Game</button>`);
+        begin.append(beginButton);
+        beginButton.click(() => {
+          $.ajax({
+            url: `startGame.php?gameId=${this.gameInfo.id}`,
+            success: (result) => {
+              let data = JSON.parse(result);
+              window.location.href = window.location.origin+`/play?gameId=${this.gameInfo.id}&playerId=${this.gameInfo.player}`;
+            }
+          });
+        });
+        return el[0];
+      }
+      startAutoUpdate() {
+        return window.setInterval(() => {
+          $.ajax({
+            url: `update.php?gameId=${this.gameInfo.id}&playerId=${this.gameInfo.player}&token=${this.gameInfo.token}`,
+            success: (result) => {
+              let data = JSON.parse(result);
+              console.log(data);
+              let prevPlayerCount = 0;
+              if(this.g) {
+                prevPlayerCount = this.g.players.length;
+              }
+              this.g = {players:[], myPlayer:this.gameInfo.player};
+              data.pieces.forEach(piece => this.g.players.push({id:piece.player,character:piece.character}));
+              if(this.g.players.length!==prevPlayerCount) {
+                this.update();
+              }
+              if(data.currentTurn!==null) {
+                window.location.href = window.location.origin+`/play?gameId=${this.gameInfo.id}&playerId=${this.gameInfo.player}`;
+              }
+            }
+          });
+        }, 1000);
+      }
+      stopAutoUpdate() {
+        window.clearInterval(this.updateId);
+      }
+    }
+
+    var currentGames = JSON.parse(localStorage.getItem("current-games"));
+    currentGames = currentGames?currentGames:[];
+    var openGamesComponent;
+    var currentGamesComponent;
+    var allGames = [];
+    $.ajax({
+      url: "getGames.php",
+      success: function(result) {
+        allGames = JSON.parse(result);
+        for(let i=currentGames.length-1; i>=0; i--) {
+          let indexInAllGames = allGames.findIndex(g => g.id===currentGames[i].id);
+          if(indexInAllGames===-1) {
+            currentGames.splice(i,1);
+          } else {
+            currentGames[i].name = allGames[indexInAllGames].name;
+            allGames.splice(indexInAllGames,1);
+          }
+        }
+        openGamesComponent = new GamesList(allGames,true);
+        openGamesComponent.insert($("#main-content")[0]);
+        currentGamesComponent = new GamesList(currentGames,false);
+        currentGamesComponent.insert($("#main-content")[0]);
+      }
+    });
+    $("#create").click(() => {
+      $("#overlay").css("display", "flex");
+      var createComponent = new CreateGameForm(currentGames[0]);
+      createComponent.insert($("#overlay div")[0]);
+    });
+  </script>
+<html>
