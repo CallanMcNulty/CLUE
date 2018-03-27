@@ -34,7 +34,7 @@ class Board extends Component {
       let background = "";
       let sString = s+"";
       if(s===0 || s<-1) {
-        background = "background-image:url(art/hallway-space.png);";
+        background = `background-image:url(${baseHref}art/hallway-space.png);`;
       } else if(sString.length===2 && sString[1]==="0") {
         let direction = -90;
         if(this.northDoors.includes(i)) {
@@ -47,12 +47,12 @@ class Board extends Component {
         background = `
           background-color:${this.spaceColors[s/10]};
           transform:rotate(${direction}deg);
-          background-image:url(art/north-door-space.png);
+          background-image:url(${baseHref}art/north-door-space.png);
         `;
       } else if(s>0 && sString.length===1) {
         background = `background-color:${this.spaceColors[s]};`;
       } else if(s>0) {
-        background = "background-image:url(art/secret-passage-space.png);";
+        background = `background-image:url(${baseHref}art/secret-passage-space.png);`;
       }
       el.append(`
         <div style="

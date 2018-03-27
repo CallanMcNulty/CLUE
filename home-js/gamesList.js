@@ -20,7 +20,7 @@ class GamesList extends Component {
             var joinComponent = new JoinInterface(g.id, g.name);
             joinComponent.insert($("#overlay div")[0]);
           } else {
-            window.location.href = window.location.origin+`/play?gameId=${g.id}&playerId=${g.player}`;
+            linkToChildPath(`play?gameId=${g.id}&playerId=${g.player}`);
           }
         });
       }

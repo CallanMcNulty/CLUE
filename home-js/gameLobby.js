@@ -66,7 +66,7 @@ class GameLobby extends Component {
         url: `startGame.php?gameId=${this.gameInfo.id}`,
         success: (result) => {
           let data = JSON.parse(result);
-          window.location.href = window.location.origin+`/play?gameId=${this.gameInfo.id}&playerId=${this.gameInfo.player}`;
+          linkToChildPath(`play?gameId=${this.gameInfo.id}&playerId=${this.gameInfo.player}`);
         }
       });
     });
@@ -89,7 +89,7 @@ class GameLobby extends Component {
             this.update();
           }
           if(data.currentTurn!==null) {
-            window.location.href = window.location.origin+`/play?gameId=${this.gameInfo.id}&playerId=${this.gameInfo.player}`;
+            linkToChildPath(`play?gameId=${this.gameInfo.id}&playerId=${this.gameInfo.player}`);
           }
         }
       });

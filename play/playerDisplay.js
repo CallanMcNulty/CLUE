@@ -47,9 +47,6 @@ class PlayerDisplay extends Component {
       if(latestSuggestionIsCurrent && latestSuggestion.resolvingPlayer===p.id)
         $(icon.element).css("box-shadow", "0 0 36px orange");
       if(this.g.currentPlayer===p.id) $(icon.element).css("top", "2em");
-
-      // $(icon.element).click(() => window.location.href =
-      //   `${window.location.origin}${window.location.pathname}?gameId=${this.g.id}&playerId=${p.id}`);
     });
 
     let suggestion = el.find("#suggestion")[0];
@@ -69,7 +66,8 @@ class PlayerDisplay extends Component {
           $(cardEl.element).css("box-shadow", "0 0 36px orange");
           $(cardEl.element).css("margin",".5em");
           $(cardEl.element).css("margin-bottom","0");
-          $(cardEl.element).click(() => this.g.resolve(cardEl.id, () => startAutoUpdate()));
+          // $(cardEl.element).click(() => this.g.resolve(cardEl.id, () => startAutoUpdate()));
+          $(cardEl.element).click(() => {this.g.resolve(cardEl.id); startAutoUpdate();});
         });
         el.append(`
           <div style="text-align:center;">Choose a card to reveal to
@@ -138,9 +136,14 @@ class PlayerDisplay extends Component {
       let accuseButton = $(`<button>Accuse</button>`);
       $(controls).append(accuseButton);
       accuseButton.click(() => {
-        $(info).empty();
         let selector = new CardSelector(this.size*0.8, 6, true);
-        selector.insert(info);
+        if(info) {
+          $(info).empty();
+          selector.insert(info);
+        } else if(suggestion) {
+          $(suggestion).empty();
+          selector.insert(suggestion);
+        }
         $(controls).empty();
         let finalAccuseButton = $(`<button>Submit final accusation</button>`);
         $(controls).append(finalAccuseButton);
@@ -148,15 +151,11 @@ class PlayerDisplay extends Component {
           this.g.accuse(selector.selectedSuspect, selector.selectedWeapon, selector.selectedRoom, () => startAutoUpdate())
         );
       });
-      // accuseButton.click(() => this.g.accuse(() => this.update()));
       let endTurnButton = $(`<button>End Turn</button>`);
       $(controls).append(endTurnButton);
-      // endTurnButton.click(() => this.g.endTurn(() => this.update()));
-      endTurnButton.click(() => this.g.endTurn(() => startAutoUpdate()));
+      // endTurnButton.click(() => this.g.endTurn(() => startAutoUpdate()));
+      endTurnButton.click(() => {this.g.endTurn(); startAutoUpdate()});
     }
-
-    // if(this.g.currentPlayer===this.g.myPlayer) {
-    // }
 
     return el[0];
   }

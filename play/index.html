@@ -4,18 +4,18 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
-    <script src="/play/cardInfo.js"></script>
-    <script src="/play/game.js"></script>
-    <script src="/play/notes.js"></script>
-    <script src="/play/framework-core.js"></script>
-    <script src="/play/board.js"></script>
-    <script src="/play/card.js"></script>
-    <script src="/play/playerIcon.js"></script>
-    <script src="/play/cardSelector.js"></script>
-    <script src="/play/playerDisplay.js"></script>
-    <script src="/play/suggestionHistory.js"></script>
-    <script src="/play/tabbedContent.js"></script>
-    <script src="/play/notebook.js"></script>
+    <script src="../play/cardInfo.js"></script>
+    <script src="../play/game.js"></script>
+    <script src="../play/notes.js"></script>
+    <script src="../play/framework-core.js"></script>
+    <script src="../play/board.js"></script>
+    <script src="../play/card.js"></script>
+    <script src="../play/playerIcon.js"></script>
+    <script src="../play/cardSelector.js"></script>
+    <script src="../play/playerDisplay.js"></script>
+    <script src="../play/suggestionHistory.js"></script>
+    <script src="../play/tabbedContent.js"></script>
+    <script src="../play/notebook.js"></script>
     <title>CLUE</title>
   </head>
   <style media="screen">
@@ -55,6 +55,12 @@
     var suggestionHistoryComponent;
     var handComponent;
     var intervalId;
+    function linkToSiblingPath(path) {
+      let currentPathArray = window.location.pathname.split("/");
+      currentPathArray.pop();
+      currentPathArray[currentPathArray.length-1] = path;
+      window.location.href = window.location.origin+currentPathArray.join("/");
+    }
     function stopAutoUpdate() {
       if(intervalId)
       window.clearInterval(intervalId);
@@ -68,7 +74,7 @@
           oldTurn = g.turn;
         }
         if(g.winner!==null) {
-          window.location.href = window.location.origin+"/victory.php?gameId="+g.id;
+          linkToSiblingPath("victory.php?gameId="+g.id);
         }
         if(tabbedContentComponent.activeTab===0) {
           boardComponent.update();
@@ -82,7 +88,7 @@
         if(myTurnAndNoUnresolvedSuggestion || needToResolveSuggestion) {
           stopAutoUpdate();
         }
-      }), 1000);
+      }), 500);
     }
     g.init(() => {
       playerDisplayComponent = new PlayerDisplay(g, Math.min(80, window.innerWidth/15));

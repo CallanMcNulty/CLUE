@@ -8,7 +8,7 @@ class HowTo extends Component {
     let el = $(`
       <div>
         <div style="overflow:auto;max-width:600px;height:80vh;">
-          <img src=/how-to-images/page-${this.page}.jpg style="width:100%;" />
+          <img src=how-to-images/page-${this.page}.jpg style="width:100%;" />
         </div>
       </div>
     `);

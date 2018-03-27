@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
     <title>CLUE</title>
-    <script src="/play/cardInfo.js"></script>
-    <script src="/play/framework-core.js"></script>
-    <script src="/play/card.js"></script>
+    <script src="./play/cardInfo.js"></script>
+    <script src="./play/framework-core.js"></script>
+    <script src="./play/card.js"></script>
   </head>
   <style media="screen">
     button {
@@ -65,7 +65,11 @@
       });
       let home = $(`<button>Home</button>`);
       el.append(home);
-      home.click(() => window.location.href = window.location.origin);
+      home.click(() => {
+        let currentPathArray = window.location.pathname.split("/");
+        currentPathArray.pop();
+        window.location.href = window.location.origin+currentPathArray.join("/");
+      });
     </script>
     <?php
       }

@@ -15,15 +15,15 @@ class Game {
   init(callback) {
     $.when(
       $.ajax({
-        url: "board.txt",
+        url: "../board.txt",
         success: (result) => this.board = JSON.parse("["+result+"]")
       }),
       $.ajax({
-        url: `getPlayers.php?gameId=${this.id}`,
+        url: `../getPlayers.php?gameId=${this.id}`,
         success: (result) => this.players = JSON.parse(result).sort((a,b) => a.turn-b.turn)
       }),
       $.ajax({
-        url: `getCards.php?gameId=${this.id}&playerId=${this.myPlayer}&token=${this.myToken}`,
+        url: `../getCards.php?gameId=${this.id}&playerId=${this.myPlayer}&token=${this.myToken}`,
         success: (result) => this.myCards = JSON.parse(result)
       })
     ).done(this.update(callback));
@@ -31,7 +31,7 @@ class Game {
   update(callback) {
     $.when(
       $.ajax({
-        url: `update.php?gameId=${this.id}&playerId=${this.myPlayer}&token=${this.myToken}`,
+        url: `../update.php?gameId=${this.id}&playerId=${this.myPlayer}&token=${this.myToken}`,
         success: (result) => {
           let data = JSON.parse(result);
           console.log(data);
@@ -46,14 +46,14 @@ class Game {
         }
       }),
       $.ajax({
-        url: `getHistory.php?gameId=${this.id}&playerId=${this.myPlayer}&token=${this.myToken}`,
+        url: `../getHistory.php?gameId=${this.id}&playerId=${this.myPlayer}&token=${this.myToken}`,
         success: (result) => this.history = JSON.parse(result)
       })
     ).done(() => callback?callback():null);
   }
   performRoll(callback) {
     $.ajax({
-      url: `roll.php?gameId=${this.id}&playerId=${this.myPlayer}&token=${this.myToken}`,
+      url: `../roll.php?gameId=${this.id}&playerId=${this.myPlayer}&token=${this.myToken}`,
       success: (result) => {
         let r = JSON.parse(result);
         console.log(r);
@@ -63,7 +63,7 @@ class Game {
   }
   move(path, callback) {
     $.ajax({
-      url: `move.php?gameId=${this.id}&playerId=${this.myPlayer}&spaces=${path.join(",")}&token=${this.myToken}`,
+      url: `../move.php?gameId=${this.id}&playerId=${this.myPlayer}&spaces=${path.join(",")}&token=${this.myToken}`,
       success: (result) => {
         let r = JSON.parse(result);
         console.log(r);
@@ -73,7 +73,7 @@ class Game {
   }
   suggest(suspectId, weaponId, callback) {
     $.ajax({
-      url: `suggest.php?gameId=${this.id}&playerId=${this.myPlayer}&suspect=${suspectId
+      url: `../suggest.php?gameId=${this.id}&playerId=${this.myPlayer}&suspect=${suspectId
             }&weapon=${weaponId}&token=${this.myToken}`,
       success: (result) => {
         let r = JSON.parse(result);
@@ -84,7 +84,7 @@ class Game {
   }
   resolve(card, callback) {
     $.ajax({
-      url: `resolve.php?gameId=${this.id}&playerId=${this.myPlayer}&card=${card}&token=${this.myToken}`,
+      url: `../resolve.php?gameId=${this.id}&playerId=${this.myPlayer}&card=${card}&token=${this.myToken}`,
       success: (result) => {
         let r = JSON.parse(result);
         console.log(r);
@@ -94,7 +94,7 @@ class Game {
   }
   endTurn(callback) {
     $.ajax({
-      url: `endTurn.php?gameId=${this.id}&playerId=${this.myPlayer}&token=${this.myToken}`,
+      url: `../endTurn.php?gameId=${this.id}&playerId=${this.myPlayer}&token=${this.myToken}`,
       success: (result) => {
         let r = JSON.parse(result);
         console.log(r);
@@ -104,7 +104,7 @@ class Game {
   }
   accuse(suspectId, weaponId, roomId, callback) {
     $.ajax({
-      url: `accuse.php?gameId=${this.id}&playerId=${this.myPlayer}&suspect=${suspectId
+      url: `../accuse.php?gameId=${this.id}&playerId=${this.myPlayer}&suspect=${suspectId
             }&weapon=${weaponId}&room=${roomId}&token=${this.myToken}`,
       success: (result) => {
         console.log(result);

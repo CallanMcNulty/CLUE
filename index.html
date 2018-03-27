@@ -4,14 +4,14 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
-    <script src="/play/cardInfo.js"></script>
-    <script src="/play/framework-core.js"></script>
-    <script src="/play/playerIcon.js"></script>
-    <script src="/home-js/gamesList.js"></script>
-    <script src="/home-js/createGameForm.js"></script>
-    <script src="/home-js/joinInterface.js"></script>
-    <script src="/home-js/gameLobby.js"></script>
-    <script src="/home-js/howTo.js"></script>
+    <script src="./play/cardInfo.js"></script>
+    <script src="./play/framework-core.js"></script>
+    <script src="./play/playerIcon.js"></script>
+    <script src="./home-js/gamesList.js"></script>
+    <script src="./home-js/createGameForm.js"></script>
+    <script src="./home-js/joinInterface.js"></script>
+    <script src="./home-js/gameLobby.js"></script>
+    <script src="./home-js/howTo.js"></script>
     <title>CLUE</title>
   </head>
   <style media="screen">
@@ -64,6 +64,9 @@
     var openGamesComponent;
     var currentGamesComponent;
     var allGames = [];
+    function linkToChildPath(path) {
+      window.location.href = window.location.origin+window.location.pathname+path;
+    }
     $.ajax({
       url: "getGames.php",
       success: function(result) {
@@ -90,7 +93,7 @@
     });
     $("#help").click(() => {
       $("#overlay").css("display", "flex");
-      var howToComponent = new HowTo(4);
+      var howToComponent = new HowTo(5);
       howToComponent.insert($("#overlay div")[0]);
     });
   </script>
